@@ -1,4 +1,6 @@
 # The-Order-Book-Kinetic
+<img width="818" height="474" alt="Screencast from 2026-06-27 06-44-32 (online-video-cutter com)" src="https://github.com/user-attachments/assets/5ce3487c-0cd2-470e-af4d-8d409597a29e" />
+
 The system uses a Single-Producer, Single-Consumer (SPSC) architecture to separate network ingestion from data processing, allowing both tasks to run independently with minimal synchronization overhead. The UDP receiver serves as the data entry point. Instead of relying on TCP, it binds a POSIX socket directly to the network interface and receives raw binary UDP packets, avoiding the latency introduced by connection management and retransmissions. Incoming packets are passed to the processing thread through a lock-free ring buffer. The buffer is pre-allocated and uses std::atomic with acquire/release memory ordering to safely transfer data between threads without the overhead of std::mutex locks. The order book maps packet data directly into C++ structures using #pragma pack, eliminating unnecessary copies and padding. Market state is stored in a pre-allocated Array of Structs (AoS), providing constant-time (O(1)) updates while keeping memory access predictable and cache-friendly. Finally, the visualizer converts the live order book into a real-time ASCII display, highlighting metrics such as Order Book Imbalance (OBI) so changes in market liquidity can be observed as they happen.
 
 ----------------------------------------
@@ -34,4 +36,3 @@ Compile the engine with standard threading libraries:
     Start the Exchange Simulator: In your second terminal (or on a remote server pointing to your local IP), run the Python script to blast the raw binary payload.
     python3 blaster.py
 Watch the Tape: The C++ terminal will instantly begin painting the microstructural pressure tape in real-time ASCII.
-<img width="818" height="474" alt="Screencast from 2026-06-27 06-44-32 (online-video-cutter com)" src="https://github.com/user-attachments/assets/5ce3487c-0cd2-470e-af4d-8d409597a29e" />
