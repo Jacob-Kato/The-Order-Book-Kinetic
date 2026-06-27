@@ -1,8 +1,8 @@
 # The-Order-Book-Kinetic
--------------------------------
-ffffffff
+The system uses a Single-Producer, Single-Consumer (SPSC) architecture to separate network ingestion from data processing, allowing both tasks to run independently with minimal synchronization overhead. The UDP receiver serves as the data entry point. Instead of relying on TCP, it binds a POSIX socket directly to the network interface and receives raw binary UDP packets, avoiding the latency introduced by connection management and retransmissions. Incoming packets are passed to the processing thread through a lock-free ring buffer. The buffer is pre-allocated and uses std::atomic with acquire/release memory ordering to safely transfer data between threads without the overhead of std::mutex locks. The order book maps packet data directly into C++ structures using #pragma pack, eliminating unnecessary copies and padding. Market state is stored in a pre-allocated Array of Structs (AoS), providing constant-time (O(1)) updates while keeping memory access predictable and cache-friendly. Finally, the visualizer converts the live order book into a real-time ASCII display, highlighting metrics such as Order Book Imbalance (OBI) so changes in market liquidity can be observed as they happen.
+
 ----------------------------------------
-## Developer Log & Core Learnings
+## Dev Log and things I learned
 
 ### The Reality of Data Types
 Before this project, I thought of data types like int and long as just different ways to store numbers. Building this parser completely changed that perspective. I learned that data types define the exact memory layout of a program. Using fixed-width types such as uint64_t (exactly 8 bytes) and uint32_t (exactly 4 bytes) is essential because it guarantees the compiler interprets the incoming binary data exactly as the exchange sent it. Without that guarantee, even a small mismatch in memory layout could cause the parser to read incorrect values.
